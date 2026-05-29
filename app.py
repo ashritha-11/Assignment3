@@ -1,4 +1,4 @@
-```python
+
 import streamlit as st
 import pandas as pd
 import joblib
@@ -183,4 +183,4 @@ st.markdown("---")
 st.markdown(
     "Built with Streamlit and Random Forest"
 )
-```
+
