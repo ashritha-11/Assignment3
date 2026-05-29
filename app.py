@@ -1,7 +1,6 @@
-
+```python
 import streamlit as st
 import pandas as pd
-import numpy as np
 import joblib
 import warnings
 
@@ -12,14 +11,13 @@ warnings.filterwarnings("ignore")
 # =========================================================
 
 st.set_page_config(
-    page_title="AI Credit Card Fraud Detector",
+    page_title="AI Fraud Detector",
     page_icon="💳",
-    layout="wide",
-    initial_sidebar_state="expanded"
+    layout="wide"
 )
 
 # =========================================================
-# LOAD MODEL
+# LOAD MODEL ONLY
 # =========================================================
 
 @st.cache_resource
@@ -32,69 +30,28 @@ def load_model():
 model = load_model()
 
 # =========================================================
-# CUSTOM CSS
-# =========================================================
-
-st.markdown("""
-<style>
-
-.main {
-    background-color: #0E1117;
-}
-
-section[data-testid="stSidebar"] {
-    background-color: #111827;
-}
-
-section[data-testid="stSidebar"] * {
-    color: white !important;
-}
-
-.stButton>button {
-    width: 100%;
-    background: linear-gradient(to right, #ff1744, #ff5252);
-    color: white;
-    border-radius: 12px;
-    height: 3.2em;
-    font-size: 18px;
-    font-weight: bold;
-    border: none;
-}
-
-.stButton>button:hover {
-    background: linear-gradient(to right, #ff5252, #ff1744);
-}
-
-h1, h2, h3 {
-    color: white;
-}
-
-</style>
-""", unsafe_allow_html=True)
-
-# =========================================================
-# HEADER
+# TITLE
 # =========================================================
 
 st.title("💳 AI Credit Card Fraud Detection System")
 
 st.markdown(
-    "Real-time fraud detection using Machine Learning and Banking AI."
+    "Real-time fraud prediction using Machine Learning"
 )
 
 st.markdown("---")
 
 # =========================================================
-# SIDEBAR INPUTS
+# SIDEBAR
 # =========================================================
 
 st.sidebar.header("Transaction Details")
 
 amount = st.sidebar.number_input(
     "Transaction Amount",
-    min_value=1.0,
-    max_value=100000.0,
-    value=1200.0
+    1.0,
+    100000.0,
+    1200.0
 )
 
 v1 = st.sidebar.slider(
@@ -112,10 +69,10 @@ v2 = st.sidebar.slider(
 )
 
 # =========================================================
-# EXACT TRAINING COLUMNS
+# INPUT DATA
 # =========================================================
 
-input_dict = {
+input_data = pd.DataFrame([{
 
     'Time': 0,
     'V1': v1,
@@ -148,38 +105,7 @@ input_dict = {
     'V28': 0,
     'Amount': amount
 
-}
-
-input_data = pd.DataFrame([input_dict])
-
-# =========================================================
-# DASHBOARD METRICS
-# =========================================================
-
-c1, c2, c3 = st.columns(3)
-
-with c1:
-
-    st.metric(
-        "Transaction Amount",
-        f"${amount:,.2f}"
-    )
-
-with c2:
-
-    st.metric(
-        "V1 Score",
-        round(v1, 2)
-    )
-
-with c3:
-
-    st.metric(
-        "V2 Score",
-        round(v2, 2)
-    )
-
-st.markdown("---")
+}])
 
 # =========================================================
 # PREDICTION
@@ -195,37 +121,25 @@ if st.button("Detect Fraud"):
             input_data
         )[0][1] * 100
 
-        # =================================================
+        # ==============================================
         # RISK LEVEL
-        # =================================================
+        # ==============================================
 
         if probability >= 80:
 
             risk = "🔴 CRITICAL"
 
-            recommendation = """
-            Immediate fraud investigation required.
-            """
-
         elif probability >= 50:
 
             risk = "🟠 HIGH"
-
-            recommendation = """
-            Transaction should be manually verified.
-            """
 
         else:
 
             risk = "🟢 LOW"
 
-            recommendation = """
-            Transaction appears legitimate.
-            """
-
-        # =================================================
+        # ==============================================
         # RESULTS
-        # =================================================
+        # ==============================================
 
         st.subheader("Fraud Detection Result")
 
@@ -234,8 +148,8 @@ if st.button("Detect Fraud"):
         with col1:
 
             st.metric(
-                label="Fraud Probability",
-                value=f"{probability:.2f}%"
+                "Fraud Probability",
+                f"{probability:.2f}%"
             )
 
             st.progress(int(probability))
@@ -247,22 +161,14 @@ if st.button("Detect Fraud"):
             if prediction == 1:
 
                 st.error(
-                    "Fraudulent transaction detected."
+                    "Fraudulent Transaction Detected"
                 )
 
             else:
 
                 st.info(
-                    "Legitimate transaction."
+                    "Legitimate Transaction"
                 )
-
-        # =================================================
-        # RECOMMENDATION
-        # =================================================
-
-        st.markdown("## Security Recommendation")
-
-        st.write(recommendation)
 
     except Exception as e:
 
@@ -275,6 +181,6 @@ if st.button("Detect Fraud"):
 st.markdown("---")
 
 st.markdown(
-    "Built with Streamlit • Random Forest • Fraud Detection AI"
+    "Built with Streamlit and Random Forest"
 )
-
+```
