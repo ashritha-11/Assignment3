@@ -1,4 +1,4 @@
-
+```python
 import streamlit as st
 import pandas as pd
 import joblib
@@ -11,13 +11,14 @@ warnings.filterwarnings("ignore")
 # =========================================================
 
 st.set_page_config(
-    page_title="AI Fraud Detector",
+    page_title="AI Credit Card Fraud Detector",
     page_icon="💳",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
 # =========================================================
-# LOAD MODEL ONLY
+# LOAD MODEL
 # =========================================================
 
 @st.cache_resource
@@ -30,13 +31,142 @@ def load_model():
 model = load_model()
 
 # =========================================================
-# TITLE
+# CUSTOM CSS
 # =========================================================
 
-st.title("💳 AI Credit Card Fraud Detection System")
+st.markdown("""
+<style>
+
+/* =====================================================
+BACKGROUND
+===================================================== */
+
+.main {
+    background: linear-gradient(to right, #0f172a, #111827);
+    color: white;
+}
+
+/* =====================================================
+SIDEBAR
+===================================================== */
+
+section[data-testid="stSidebar"] {
+    background: #0B1120;
+    border-right: 1px solid #1f2937;
+}
+
+section[data-testid="stSidebar"] * {
+    color: white !important;
+}
+
+/* =====================================================
+TITLE
+===================================================== */
+
+.main-title {
+    font-size: 42px;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    color: #9ca3af;
+    font-size: 18px;
+    margin-bottom: 30px;
+}
+
+/* =====================================================
+CARDS
+===================================================== */
+
+.card {
+    background: #111827;
+    padding: 25px;
+    border-radius: 18px;
+    border: 1px solid #1f2937;
+    box-shadow: 0px 4px 15px rgba(0,0,0,0.4);
+    text-align: center;
+}
+
+.card-title {
+    color: #9ca3af;
+    font-size: 16px;
+}
+
+.card-value {
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+/* =====================================================
+BUTTON
+===================================================== */
+
+.stButton>button {
+    width: 100%;
+    background: linear-gradient(to right, #ff1744, #ff4b2b);
+    color: white;
+    border-radius: 12px;
+    height: 3.3em;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    transition: 0.3s ease-in-out;
+}
+
+.stButton>button:hover {
+    transform: scale(1.02);
+    background: linear-gradient(to right, #ff4b2b, #ff1744);
+}
+
+/* =====================================================
+METRICS
+===================================================== */
+
+[data-testid="metric-container"] {
+    background: #111827;
+    border: 1px solid #1f2937;
+    padding: 20px;
+    border-radius: 15px;
+}
+
+/* =====================================================
+FOOTER
+===================================================== */
+
+.footer {
+    text-align: center;
+    color: #9ca3af;
+    padding-top: 20px;
+    font-size: 14px;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+# =========================================================
+# HEADER
+# =========================================================
 
 st.markdown(
-    "Real-time fraud prediction using Machine Learning"
+    """
+    <div class="main-title">
+        💳 AI Credit Card Fraud Detection System
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+st.markdown(
+    """
+    <div class="subtitle">
+        Real-time banking fraud detection using Artificial Intelligence and Machine Learning
+    </div>
+    """,
+    unsafe_allow_html=True
 )
 
 st.markdown("---")
@@ -45,27 +175,33 @@ st.markdown("---")
 # SIDEBAR
 # =========================================================
 
-st.sidebar.header("Transaction Details")
+st.sidebar.markdown("## 🧾 Transaction Details")
 
 amount = st.sidebar.number_input(
-    "Transaction Amount",
-    1.0,
-    100000.0,
-    1200.0
+    "Transaction Amount ($)",
+    min_value=1.0,
+    max_value=100000.0,
+    value=1200.0
 )
 
 v1 = st.sidebar.slider(
-    "V1",
+    "V1 Feature",
     -30.0,
     30.0,
     -1.23
 )
 
 v2 = st.sidebar.slider(
-    "V2",
+    "V2 Feature",
     -30.0,
     30.0,
     2.56
+)
+
+st.sidebar.markdown("---")
+
+st.sidebar.info(
+    "Adjust transaction parameters to analyze fraud risk."
 )
 
 # =========================================================
@@ -108,10 +244,45 @@ input_data = pd.DataFrame([{
 }])
 
 # =========================================================
-# PREDICTION
+# TOP DASHBOARD
 # =========================================================
 
-if st.button("Detect Fraud"):
+col1, col2, col3 = st.columns(3)
+
+with col1:
+
+    st.markdown(f"""
+    <div class="card">
+        <div class="card-title">Transaction Amount</div>
+        <div class="card-value">${amount:,.2f}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col2:
+
+    st.markdown(f"""
+    <div class="card">
+        <div class="card-title">V1 Score</div>
+        <div class="card-value">{v1:.2f}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col3:
+
+    st.markdown(f"""
+    <div class="card">
+        <div class="card-title">V2 Score</div>
+        <div class="card-value">{v2:.2f}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# =========================================================
+# PREDICTION BUTTON
+# =========================================================
+
+if st.button("🔍 Analyze Transaction"):
 
     try:
 
@@ -121,31 +292,44 @@ if st.button("Detect Fraud"):
             input_data
         )[0][1] * 100
 
-        # ==============================================
+        # =================================================
         # RISK LEVEL
-        # ==============================================
+        # =================================================
 
         if probability >= 80:
 
-            risk = "🔴 CRITICAL"
+            risk = "🔴 CRITICAL RISK"
+
+            recommendation = """
+            Immediate fraud investigation required.
+            Block the transaction temporarily.
+            """
 
         elif probability >= 50:
 
-            risk = "🟠 HIGH"
+            risk = "🟠 HIGH RISK"
+
+            recommendation = """
+            Manual verification recommended before approval.
+            """
 
         else:
 
-            risk = "🟢 LOW"
+            risk = "🟢 LOW RISK"
 
-        # ==============================================
+            recommendation = """
+            Transaction appears safe and legitimate.
+            """
+
+        # =================================================
         # RESULTS
-        # ==============================================
+        # =================================================
 
-        st.subheader("Fraud Detection Result")
+        st.markdown("## 📊 Fraud Analysis Report")
 
-        col1, col2 = st.columns(2)
+        result1, result2 = st.columns(2)
 
-        with col1:
+        with result1:
 
             st.metric(
                 "Fraud Probability",
@@ -154,21 +338,61 @@ if st.button("Detect Fraud"):
 
             st.progress(int(probability))
 
-        with col2:
+        with result2:
 
-            st.success(f"Risk Level: {risk}")
+            st.metric(
+                "Risk Category",
+                risk
+            )
 
             if prediction == 1:
 
                 st.error(
-                    "Fraudulent Transaction Detected"
+                    "⚠ Fraudulent Transaction Detected"
                 )
 
             else:
 
-                st.info(
-                    "Legitimate Transaction"
+                st.success(
+                    "✔ Legitimate Transaction"
                 )
+
+        st.markdown("---")
+
+        # =================================================
+        # SECURITY RECOMMENDATION
+        # =================================================
+
+        st.markdown("## 🛡 Security Recommendation")
+
+        st.info(recommendation)
+
+        # =================================================
+        # TRANSACTION SUMMARY
+        # =================================================
+
+        st.markdown("## 📋 Transaction Summary")
+
+        summary_df = pd.DataFrame({
+
+            "Feature": [
+                "Transaction Amount",
+                "V1 Score",
+                "V2 Score"
+            ],
+
+            "Value": [
+                amount,
+                v1,
+                v2
+            ]
+
+        })
+
+        st.dataframe(
+            summary_df,
+            use_container_width=True
+        )
 
     except Exception as e:
 
@@ -181,6 +405,11 @@ if st.button("Detect Fraud"):
 st.markdown("---")
 
 st.markdown(
-    "Built with Streamlit and Random Forest"
+    """
+    <div class="footer">
+        Built with Streamlit • Scikit-Learn • Random Forest • Banking AI
+    </div>
+    """,
+    unsafe_allow_html=True
 )
-
+```
